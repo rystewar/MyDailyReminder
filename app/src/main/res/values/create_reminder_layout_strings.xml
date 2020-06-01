@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reminder_name_title">Name</string>
+    <string name="reminder_name_hint">My Reminder</string>
+</resources>
