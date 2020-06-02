@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="reminder_name_title">Name</string>
-    <string name="reminder_name_hint">My Reminder</string>
+    <string name="reminder_name_hint">Name of your reminder</string>
+    <string name="reminder_description_title">Description</string>
+    <string name="reminder_description_hint">A little description of your reminder</string>
+    <string name="reminder_frequency_title">Frequency</string>
 </resources>
