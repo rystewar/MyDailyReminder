@@ -6,14 +6,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import com.example.mydailyreminder.databinding.CreateReminderLayoutBinding
+import com.example.mydailyreminder.dataclasses.Reminder
+import com.example.mydailyreminder.dataclasses.ReminderFrequency
+import com.example.mydailyreminder.exceptions.InvalidDataException
+import com.example.mydailyreminder.viewmodels.CreateReminderViewModel
 
 class CreateReminderFragment : Fragment() {
 
     private lateinit var createReminderLayout: CreateReminderLayoutBinding
+    private val viewModel: CreateReminderViewModel by viewModels()
 
     // TODO: Edit text takes focus after changing orientation and opens the keyboard which is annoying. Investigate
+    // TODO: Give more precise reminder frequency options
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,10 +49,20 @@ class CreateReminderFragment : Fragment() {
     }
 
     private fun setupSaveButton() {
-        // TODO: Store reminder in DB and navigate back home
-        // TODO: If any fields are empty alert the user
         createReminderLayout.headerSave.setOnClickListener {
-            Toast.makeText(context, "Save Clicked", Toast.LENGTH_LONG).show()
+            // TODO: Store reminder in DB and navigate back home
+            // TODO: If any fields are empty, highlight them and alert the user
+            try {
+                viewModel.createReminder(
+                    Reminder(
+                        getReminderName(),
+                        getReminderDescription(),
+                        getReminderFrequency()
+                    )
+                )
+            } catch (e: InvalidDataException) {
+                Toast.makeText(context, "Missing required data", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -85,5 +102,31 @@ class CreateReminderFragment : Fragment() {
 
     private fun resetFrequencyButton(button: View) {
         button.isSelected = false
+    }
+
+    private fun getReminderName(): String {
+        val name = createReminderLayout.reminderNameEditText.text.toString()
+
+        if (!name.isBlank()) {
+            return name
+        } else {
+            throw InvalidDataException()
+        }
+    }
+
+    private fun getReminderDescription(): String {
+        return createReminderLayout.reminderDescriptionEditText.text.toString()
+    }
+
+    private fun getReminderFrequency(): ReminderFrequency {
+        val daily = createReminderLayout.dailyFrequencyButton.isSelected
+        val weekly = createReminderLayout.weeklyFrequencyButton.isSelected
+        val monthly = createReminderLayout.monthlyFrequencyButton.isSelected
+
+        if (daily xor weekly xor monthly) {
+            return ReminderFrequency(daily, weekly, monthly)
+        } else {
+            throw InvalidDataException()
+        }
     }
 }
