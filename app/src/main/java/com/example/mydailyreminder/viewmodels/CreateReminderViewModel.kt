@@ -1,13 +1,14 @@
 package com.example.mydailyreminder.viewmodels
 
-import android.util.Log
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.mydailyreminder.dataclasses.Reminder
+import com.example.mydailyreminder.data.database.ReminderDatabase
+import com.example.mydailyreminder.data.dataclasses.Reminder
+import com.example.mydailyreminder.repositories.ReminderRepository
 
-class CreateReminderViewModel: ViewModel() {
+class CreateReminderViewModel constructor(reminderDatabase: ReminderDatabase) : ViewModel() {
+    private val reminderRepository = ReminderRepository.getInstance(reminderDatabase)
 
-    fun createReminder(reminder: Reminder) {
-        Log.d("@@@", "Creating reminder: $reminder")
+    suspend fun createReminder(reminder: Reminder) {
+        reminderRepository.insertOrUpdateReminder(reminder)
     }
 }

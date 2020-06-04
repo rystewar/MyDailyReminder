@@ -8,16 +8,25 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
+import com.example.mydailyreminder.data.database.DatabaseProvider
+import com.example.mydailyreminder.data.dataclasses.Reminder
+import com.example.mydailyreminder.data.dataclasses.ReminderFrequency
 import com.example.mydailyreminder.databinding.CreateReminderLayoutBinding
-import com.example.mydailyreminder.dataclasses.Reminder
-import com.example.mydailyreminder.dataclasses.ReminderFrequency
 import com.example.mydailyreminder.exceptions.InvalidDataException
 import com.example.mydailyreminder.viewmodels.CreateReminderViewModel
+import com.example.mydailyreminder.viewmodels.CreateReminderViewModelFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class CreateReminderFragment : Fragment() {
 
     private lateinit var createReminderLayout: CreateReminderLayoutBinding
-    private val viewModel: CreateReminderViewModel by viewModels()
+    private val viewModel: CreateReminderViewModel by viewModels {
+        CreateReminderViewModelFactory(DatabaseProvider.getReminderDataBase(requireContext()))
+    }
 
     // TODO: Edit text takes focus after changing orientation and opens the keyboard which is annoying. Investigate
     // TODO: Give more precise reminder frequency options
@@ -50,16 +59,22 @@ class CreateReminderFragment : Fragment() {
 
     private fun setupSaveButton() {
         createReminderLayout.headerSave.setOnClickListener {
-            // TODO: Store reminder in DB and navigate back home
             // TODO: If any fields are empty, highlight them and alert the user
             try {
-                viewModel.createReminder(
-                    Reminder(
-                        getReminderName(),
-                        getReminderDescription(),
-                        getReminderFrequency()
+                CoroutineScope(IO).launch {
+                    viewModel.createReminder(
+                        Reminder(
+                            getReminderName(),
+                            getReminderDescription(),
+                            getReminderFrequency()
+                        )
                     )
-                )
+
+                    withContext(Main) {
+                        // TODO: Indicate reminder was saved successfully (Without Toast)
+                        Toast.makeText(context, "Reminder created!", Toast.LENGTH_LONG).show()
+                    }
+                }
             } catch (e: InvalidDataException) {
                 Toast.makeText(context, "Missing required data", Toast.LENGTH_LONG).show()
             }
