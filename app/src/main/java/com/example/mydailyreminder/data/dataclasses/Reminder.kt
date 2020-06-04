@@ -1,6 +1,6 @@
-package com.example.mydailyreminder.dataclasses
+package com.example.mydailyreminder.data.dataclasses
 
-data class Reminder (
+data class Reminder(
     var name: String,
     var description: String = "",
     var frequency: ReminderFrequency
