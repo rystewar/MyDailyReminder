@@ -8,25 +8,23 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
-import com.example.mydailyreminder.data.database.DatabaseProvider
 import com.example.mydailyreminder.data.dataclasses.Reminder
 import com.example.mydailyreminder.data.dataclasses.ReminderFrequency
 import com.example.mydailyreminder.databinding.CreateReminderLayoutBinding
 import com.example.mydailyreminder.exceptions.InvalidDataException
 import com.example.mydailyreminder.viewmodels.CreateReminderViewModel
-import com.example.mydailyreminder.viewmodels.CreateReminderViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@AndroidEntryPoint
 class CreateReminderFragment : Fragment() {
 
     private lateinit var createReminderLayout: CreateReminderLayoutBinding
-    private val viewModel: CreateReminderViewModel by viewModels {
-        CreateReminderViewModelFactory(DatabaseProvider.getReminderDataBase(requireContext()))
-    }
+    private val viewModel: CreateReminderViewModel by viewModels()
 
     // TODO: Edit text takes focus after changing orientation and opens the keyboard which is annoying. Investigate
     // TODO: Give more precise reminder frequency options
