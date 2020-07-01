@@ -13,10 +13,30 @@
         <action
             android:id="@+id/action_homeFragment_to_createReminderFragment"
             app:destination="@id/createReminderFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_myRemindersFragment"
+            app:destination="@id/myRemindersFragment" />
     </fragment>
     <fragment
         android:id="@+id/createReminderFragment"
         android:name="com.example.mydailyreminder.fragments.CreateReminderFragment"
         android:label="CreateReminderFragment"
-        tools:layout="@layout/create_reminder_layout"/>
+        tools:layout="@layout/edit_reminder_layout"/>
+    <fragment
+        android:id="@+id/myRemindersFragment"
+        android:name="com.example.mydailyreminder.fragments.MyRemindersFragment"
+        android:label="MyRemindersFragment"
+        tools:layout="@layout/reminder_list_item_layout">
+        <action
+            android:id="@+id/action_myRemindersFragment_to_editReminderFragment"
+            app:destination="@id/editReminderFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/editReminderFragment"
+        android:name="com.example.mydailyreminder.fragments.EditReminderFragment"
+        android:label="EditReminderFragment" >
+        <argument
+            android:name="reminder"
+            app:argType="com.example.mydailyreminder.data.dataclasses.Reminder" />
+    </fragment>
 </navigation>

@@ -16,4 +16,8 @@ class ReminderRepository @Inject constructor(
     suspend fun insertOrUpdateReminder(reminder: Reminder) {
         reminderDao.insertOrUpdateReminder(reminder.toDatabaseReminder())
     }
+
+    suspend fun reminderExists(reminder: Reminder): Boolean {
+        return reminderDao.reminderExists(reminder.name).isNotEmpty()
+    }
 }

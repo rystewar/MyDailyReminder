@@ -5,10 +5,14 @@ import androidx.lifecycle.ViewModel
 import com.example.mydailyreminder.data.dataclasses.Reminder
 import com.example.mydailyreminder.repositories.ReminderRepository
 
-class CreateReminderViewModel @ViewModelInject constructor(
+class MyRemindersViewModel @ViewModelInject constructor(
     private val reminderRepository: ReminderRepository
 ) : ViewModel() {
-    suspend fun createReminder(reminder: Reminder) {
+    suspend fun getReminders(): List<Reminder> {
+        return reminderRepository.getReminders()
+    }
+
+    suspend fun updateReminder(reminder: Reminder) {
         reminderRepository.insertOrUpdateReminder(reminder)
     }
 }

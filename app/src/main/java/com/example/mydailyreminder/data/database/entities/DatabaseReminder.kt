@@ -9,5 +9,6 @@ data class DatabaseReminder (
     @PrimaryKey
     val name: String,
     val description: String = "",
-    val frequency: String
+    val frequency: String,
+    val isEnabled: Boolean = true
 )

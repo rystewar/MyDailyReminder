@@ -15,11 +15,12 @@ fun DatabaseReminder.toReminder(): Reminder {
     return Reminder(
         name,
         description,
-        Json(JsonConfiguration.Stable).parse(ReminderFrequency.serializer(), frequency)
+        Json(JsonConfiguration.Stable).parse(ReminderFrequency.serializer(), frequency),
+        isEnabled
     )
 }
 
 //TODO: Look into TypeConverters
 fun Reminder.toDatabaseReminder(): DatabaseReminder {
-    return DatabaseReminder(name, description, frequency.toJson())
+    return DatabaseReminder(name, description, frequency.toJson(), isEnabled)
 }

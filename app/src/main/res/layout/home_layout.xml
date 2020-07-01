@@ -37,8 +37,9 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:gravity="center"
-        android:text="Edit Reminders"
+        android:text="My Reminders"
         android:textSize="20dp"
+        android:textColor="@color/colorPrimary"
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/guideline_vertical_50"

@@ -29,7 +29,7 @@ class HomeFragment : Fragment() {
     private fun setupButtons() {
 //        setupFindRemindersButton()
         setupCreateRemindersButton()
-//        setupEditRemindersButton()
+        setupMyRemindersButton()
 //        setupSettingsButton()
     }
 
@@ -46,9 +46,10 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun setupEditRemindersButton() {
+    private fun setupMyRemindersButton() {
         homeLayout.editRemindersButton.setOnClickListener {
-            // TODO
+            val action = HomeFragmentDirections.actionHomeFragmentToMyRemindersFragment()
+            it.findNavController().navigate(action)
         }
     }
 

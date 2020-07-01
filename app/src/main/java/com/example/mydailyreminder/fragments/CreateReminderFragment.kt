@@ -1,145 +1,78 @@
 package com.example.mydailyreminder.fragments
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.app.AlertDialog
+import android.content.DialogInterface
+import android.util.Log
 import android.widget.Toast
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.navigation.findNavController
+import com.example.mydailyreminder.R
 import com.example.mydailyreminder.data.dataclasses.Reminder
-import com.example.mydailyreminder.data.dataclasses.ReminderFrequency
-import com.example.mydailyreminder.databinding.CreateReminderLayoutBinding
 import com.example.mydailyreminder.exceptions.InvalidDataException
-import com.example.mydailyreminder.viewmodels.CreateReminderViewModel
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-@AndroidEntryPoint
-class CreateReminderFragment : Fragment() {
+class CreateReminderFragment : BaseEditReminderFragment() {
 
-    private lateinit var createReminderLayout: CreateReminderLayoutBinding
-    private val viewModel: CreateReminderViewModel by viewModels()
-
-    // TODO: Edit text takes focus after changing orientation and opens the keyboard which is annoying. Investigate
-    // TODO: Give more precise reminder frequency options
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        createReminderLayout = CreateReminderLayoutBinding.inflate(inflater, container, false)
-        return createReminderLayout.root
+    override fun getHeaderTitle(): String {
+        return "Create Reminder"
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setupViews()
-    }
+    override fun onSaveClicked() {
+        Log.d("@@@", "Save Clicked")
+        // TODO: If any fields are empty, highlight them and alert the user
+        // TODO: If reminder with same name already exists, prompt to override it
+        CoroutineScope(Dispatchers.IO).launch {
+            val reminder = Reminder(
+                getReminderName(),
+                getReminderDescription(),
+                getReminderFrequency(),
+                true
+            )
 
-    private fun setupViews() {
-        setupBackIcon()
-        setupSaveButton()
-        setupFrequencyButtons()
-    }
+            if (reminderExists(reminder)) {
+                Log.d("@@@", "Reminder already exists")
+                // TODO: Tell user reminder already exists - Ask them if they want to override the old one
 
-    private fun setupBackIcon() {
-        createReminderLayout.headerBackIcon.setOnClickListener {
-            it.findNavController().popBackStack()
-        }
-    }
-
-    private fun setupSaveButton() {
-        createReminderLayout.headerSave.setOnClickListener {
-            // TODO: If any fields are empty, highlight them and alert the user
-            try {
-                CoroutineScope(IO).launch {
-                    viewModel.createReminder(
-                        Reminder(
-                            getReminderName(),
-                            getReminderDescription(),
-                            getReminderFrequency()
-                        )
-                    )
-
-                    withContext(Main) {
-                        // TODO: Indicate reminder was saved successfully (Without Toast)
-                        Toast.makeText(context, "Reminder created!", Toast.LENGTH_LONG).show()
+                // TODO: Make this modal look nice
+                // TODO: If user wants to replace reminder, simply update the existing reminder with the new data
+                // TODO: If the user chooses not to replace reminder, highlight name field to indicate what needs updated
+                withContext(Main) {
+                    val builder: AlertDialog.Builder? = activity?.let {
+                        AlertDialog.Builder(it)
                     }
+
+                    builder?.setMessage("A reminder with this name already exists. Would you want to replace it?")?.setTitle("Error")?.setPositiveButton("Replace", DialogInterface.OnClickListener { dialog, which ->
+                        Log.d("@@@", "Positive button clicked")
+                    })?.setNegativeButton("Back", DialogInterface.OnClickListener { dialog, which ->
+                        Log.d("@@@", "Negative button clicked")
+                    })
+
+                    val dialog: AlertDialog? = builder?.create()
+                    dialog?.show()
                 }
-            } catch (e: InvalidDataException) {
-                Toast.makeText(context, "Missing required data", Toast.LENGTH_LONG).show()
+
+
+            } else {
+                createReminder(reminder)
             }
         }
     }
 
-    private fun setupFrequencyButtons() {
-        setupDailyFrequencyButton()
-        setupWeeklyFrequencyButton()
-        setupMonthlyFrequencyButton()
+    private suspend fun reminderExists(reminder: Reminder): Boolean {
+        return viewModel.reminderExists(reminder)
     }
 
-    private fun setupDailyFrequencyButton() {
-        createReminderLayout.dailyFrequencyButton.setOnClickListener {
-            toggleFrequencyButton(it)
-            resetFrequencyButton(createReminderLayout.weeklyFrequencyButton)
-            resetFrequencyButton(createReminderLayout.monthlyFrequencyButton)
-        }
-    }
+    private suspend fun createReminder(reminder: Reminder) {
+        try {
+            viewModel.createOrUpdateReminder(reminder)
 
-    private fun setupWeeklyFrequencyButton() {
-        createReminderLayout.weeklyFrequencyButton.setOnClickListener {
-            toggleFrequencyButton(it)
-            resetFrequencyButton(createReminderLayout.dailyFrequencyButton)
-            resetFrequencyButton(createReminderLayout.monthlyFrequencyButton)
-        }
-    }
-
-    private fun setupMonthlyFrequencyButton() {
-        createReminderLayout.monthlyFrequencyButton.setOnClickListener {
-            toggleFrequencyButton(it)
-            resetFrequencyButton(createReminderLayout.dailyFrequencyButton)
-            resetFrequencyButton(createReminderLayout.weeklyFrequencyButton)
-        }
-    }
-
-    private fun toggleFrequencyButton(button: View) {
-        button.isSelected = !button.isSelected
-    }
-
-    private fun resetFrequencyButton(button: View) {
-        button.isSelected = false
-    }
-
-    private fun getReminderName(): String {
-        val name = createReminderLayout.reminderNameEditText.text.toString()
-
-        if (!name.isBlank()) {
-            return name
-        } else {
-            throw InvalidDataException()
-        }
-    }
-
-    private fun getReminderDescription(): String {
-        return createReminderLayout.reminderDescriptionEditText.text.toString()
-    }
-
-    private fun getReminderFrequency(): ReminderFrequency {
-        val daily = createReminderLayout.dailyFrequencyButton.isSelected
-        val weekly = createReminderLayout.weeklyFrequencyButton.isSelected
-        val monthly = createReminderLayout.monthlyFrequencyButton.isSelected
-
-        if (daily xor weekly xor monthly) {
-            return ReminderFrequency(daily, weekly, monthly)
-        } else {
-            throw InvalidDataException()
+            withContext(Main) {
+                // TODO: Indicate reminder was saved successfully (Without Toast)
+                Toast.makeText(context, "Reminder created!", Toast.LENGTH_LONG).show()
+            }
+        } catch (e: InvalidDataException) {
+            withContext(Main) {
+                Toast.makeText(context, "Missing required data", Toast.LENGTH_LONG).show()
+            }
         }
     }
 }

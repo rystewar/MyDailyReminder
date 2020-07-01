@@ -13,4 +13,7 @@ interface ReminderDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateReminder(reminder: DatabaseReminder)
+
+    @Query("SELECT * FROM DatabaseReminder WHERE name IS :reminderName")
+    suspend fun reminderExists(reminderName: String): List<DatabaseReminder>
 }
