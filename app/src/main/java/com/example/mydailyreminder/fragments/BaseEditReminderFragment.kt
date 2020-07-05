@@ -1,23 +1,19 @@
 package com.example.mydailyreminder.fragments
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
-import com.example.mydailyreminder.data.dataclasses.Reminder
 import com.example.mydailyreminder.data.dataclasses.ReminderFrequency
 import com.example.mydailyreminder.databinding.EditReminderLayoutBinding
 import com.example.mydailyreminder.exceptions.InvalidDataException
 import com.example.mydailyreminder.viewmodels.EditReminderViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 //TODO: This class should be abstract but there's an issue with hilt when using @AndroidEntryPoint on an abstract class (https://github.com/google/dagger/issues/1955)
 @AndroidEntryPoint
@@ -129,5 +125,20 @@ open class BaseEditReminderFragment: Fragment() {
         } else {
             throw InvalidDataException()
         }
+    }
+
+    protected fun showDuplicateReminderModal(
+        onReplaceClickListener: DialogInterface.OnClickListener,
+        onBackClickListener: DialogInterface.OnClickListener
+    ) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+
+        builder.setTitle("Error")
+            .setMessage("A reminder with this name already exists. Would you like to replace it?")
+            .setPositiveButton("Replace", onReplaceClickListener )
+            .setNegativeButton("Back", onBackClickListener)
+
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
     }
 }

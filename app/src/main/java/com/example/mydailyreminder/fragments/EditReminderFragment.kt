@@ -1,8 +1,11 @@
 package com.example.mydailyreminder.fragments
 
+import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.mydailyreminder.data.dataclasses.Reminder
 import com.example.mydailyreminder.exceptions.InvalidDataException
@@ -11,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+//TODO: Enable save button after something's been changed
 class EditReminderFragment: BaseEditReminderFragment() {
     val args: EditReminderFragmentArgs by navArgs()
 
@@ -24,24 +28,57 @@ class EditReminderFragment: BaseEditReminderFragment() {
         // TODO: If any fields are empty, highlight them and alert the user
         // TODO: If user attempts to change reminder name, ensure the old reminder is deleted
         CoroutineScope(Dispatchers.IO).launch {
-            try {
-                viewModel.createOrUpdateReminder(
-                    Reminder(
-                        getReminderName(),
-                        getReminderDescription(),
-                        getReminderFrequency(),
-                        true
-                    )
-                )
+            val editedReminder = Reminder(
+                getReminderName(),
+                getReminderDescription(),
+                getReminderFrequency(),
+                true
+            )
 
-                withContext(Dispatchers.Main) {
-                    // TODO: Indicate reminder was saved successfully (Without Toast) then pop backstack
-                    Toast.makeText(context, "Reminder created!", Toast.LENGTH_LONG).show()
+            when {
+                reminder.name == editedReminder.name -> {
+                    createOrUpdateReminder(editedReminder)
+                    findNavController().popBackStack()
                 }
-            } catch (e: InvalidDataException) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Missing required data", Toast.LENGTH_LONG).show()
+                reminder.name != editedReminder.name && viewModel.reminderExists(editedReminder) -> {
+                    val replaceClickListener = DialogInterface.OnClickListener { _, _ ->
+                        CoroutineScope(Dispatchers.IO).launch {
+                            viewModel.deleteReminder(reminder)
+                            createOrUpdateReminder(editedReminder)
+                            findNavController().popBackStack()
+                        }
+                    }
+                    val backClickListener = DialogInterface.OnClickListener { _, _ ->
+                        Log.d("@@@", "Back Clicked")
+                    }
+
+                    withContext(Dispatchers.Main) {
+                        showDuplicateReminderModal(replaceClickListener, backClickListener)
+                    }
                 }
+                else -> {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        viewModel.deleteReminder(reminder)
+                        createOrUpdateReminder(editedReminder)
+                        findNavController().popBackStack()
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun createOrUpdateReminder(editedReminder: Reminder) {
+        try {
+            viewModel.createOrUpdateReminder(
+                editedReminder
+            )
+
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Reminder created!", Toast.LENGTH_LONG).show()
+            }
+        } catch (e: InvalidDataException) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Missing required data", Toast.LENGTH_LONG).show()
             }
         }
     }

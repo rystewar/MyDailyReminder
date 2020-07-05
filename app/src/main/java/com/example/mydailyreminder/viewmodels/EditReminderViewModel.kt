@@ -15,4 +15,8 @@ class EditReminderViewModel @ViewModelInject constructor(
     suspend fun reminderExists(reminder: Reminder): Boolean {
         return reminderRepository.reminderExists(reminder)
     }
+
+    suspend fun deleteReminder(reminder: Reminder) {
+        reminderRepository.deleteReminder(reminder)
+    }
 }

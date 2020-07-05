@@ -20,4 +20,8 @@ class ReminderRepository @Inject constructor(
     suspend fun reminderExists(reminder: Reminder): Boolean {
         return reminderDao.reminderExists(reminder.name).isNotEmpty()
     }
+
+    suspend fun deleteReminder(reminder: Reminder) {
+        reminderDao.deleteReminder(reminder.toDatabaseReminder())
+    }
 }
